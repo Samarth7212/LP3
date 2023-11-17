@@ -1,0 +1,97 @@
+Assi1-
+
+import pandas as pd;
+import numpy as np;
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# display Matplotlib plots directly within the notebook 
+%matplotlib inline 
+
+df= pd.read_csv("uber.csv")
+# df.head()
+# df.isnull().sum()
+df.dropna(inplace=True)
+
+# df.describe()
+
+# This line filters the DataFrame rows where the "fare_amount" is greater than or equal to 0. It removes any rows where the fare amount is negative, assuming that negative fare amounts are not valid or meaningful in the context of the dataset.
+df= df[df["fare_amount"].apply( lambda x : x>=0)]
+
+# This line filters the DataFrame rows where the "passenger_count" is less than or equal to 8. It removes any rows where the passenger count is greater than 8, assuming that a passenger count greater than 8 is either an error or an outlier in the dataset. This is a common practice when dealing with datasets where certain values are expected to fall within a specific range.
+df = df[df["passenger_count"].apply(lambda x : x <= 8)]
+
+# df.describe()
+plt.boxplot(df["fare_amount"])
+
+# This line calculates the 1st percentile (or the 1st quantile) of the "fare_amount" column. The 1st percentile represents the value below which 1% of the data falls. In other words, q_low is a threshold below which only 1% of the fare amounts in the dataset are located. This threshold is often used to identify and filter out extremely low values, potentially indicating outliers or errors.
+q_low = df["fare_amount"].quantile(0.01)
+
+# This line calculates the 99th percentile (or the 99th quantile) of the "fare_amount" column. The 99th percentile represents the value below which 99% of the data falls. q_high is a threshold above which only 1% of the fare amounts in the dataset are located. This threshold is used to identify and filter out extremely high values, which could be outliers or errors.
+q_high= df["fare_amount"].quantile(0.99) 
+
+df= df[ (df["fare_amount"] < q_high) & (df["fare_amount"] > q_low)]
+
+# df.describe()
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.model_selection import train_test_split
+
+df.drop(columns="pickup_datetime", inplace=True)
+df.drop(columns="Unnamed: 0", inplace=True)
+df.drop(columns="key", inplace=True)
+# df.dtypes
+
+
+x= df.drop("fare_amount", axis=1)
+y= df["fare_amount"]
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=1)
+# x_train.head()
+
+lrmodel= LinearRegression()
+lrmodel.fit(x_train, y_train)
+predictedValues= lrmodel.predict(x_test)
+
+# Uses the trained linear regression model to make predictions on the test set (x_test).
+
+from sklearn.metrics import mean_squared_error
+lrmodelrmse= np.sqrt(mean_squared_error(predictedValues, y_test))
+print("RMSE value for Linear regression is", lrmodelrmse)
+
+from sklearn.ensemble import RandomForestRegressor
+rfr_model = RandomForestRegressor(n_estimators=100, random_state = 101)
+
+rfr_model.fit(x_train, y_train)
+rfrmodel_pred = rfr_model.predict(x_test)
+
+#Errors for the forest
+rfrmodel_rmse = mean_squared_error(rfrmodel_pred, y_test, squared=False)
+print("RMSE value for Random Forest is:",rfrmodel_rmse)
+
+# Mean Squared Error (MSE):
+# The Mean Squared Error is a common metric used to measure the average squared difference between the predicted and actual values in a regression problem. It is calculated by taking the average of the squared differences between predicted and actual values for each data point. The formula for MSE is:
+
+# Root Mean Squared Error (RMSE):
+# The Root Mean Squared Error is the square root of the Mean Squared Error. It is a popular metric because it shares the same scale as the target variable, making it more interpretable. The formula for RMSE is:
+
+# Both MSE and RMSE provide a measure of the average magnitude of errors, with lower values indicating better model performance. RMSE is often preferred over MSE when you want an error metric in the same units as the target variable.
+
+# In summary:
+
+# MSE is the average of squared differences between predicted and actual values.
+# RMSE is the square root of MSE and provides a more interpretable error metric.
+
+
+
+
+
+
+
+
+
+
+
+
+

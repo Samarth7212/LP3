@@ -1,0 +1,39 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+df= pd.read_csv("emails.csv")
+# df.head()
+# df.describe()
+# for column in df.columns:
+#     print(column)
+
+x= df.drop(columns=['Email No.', 'spam'])
+y= df['spam']
+
+from sklearn.metrics import r2_score, mean_squared_error, accuracy_score
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+
+# The SVC (Support Vector Classifier) in scikit-learn is a machine learning algorithm that is used for classification tasks. Its primary purpose is to find the optimal hyperplane that separates different classes in the feature space. Here's a breakdown of what SVC does:
+svc= SVC()
+svc.fit(x_train, y_train)
+svc_y_pred= svc.predict(x_test)
+
+def evaluateModel(predictions, model_name):
+    accuracy = accuracy_score(predictions, y_test)
+    rmse = mean_squared_error(predictions, y_test, squared=False)
+    print("Accuracy Score for SVC : ", accuracy)
+    print("RMSE Score for SVC : ", rmse)
+
+evaluateModel(svc_y_pred, "SVM")
+
+knn = KNeighborsClassifier(n_neighbors=7)
+knn.fit(x_train, y_train)
+knn_pred = knn.predict(x_test)
+print("Accuracy ", accuracy_score(knn_pred, y_test))
+

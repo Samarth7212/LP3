@@ -1,0 +1,40 @@
+# An algorithm to minimize a function by optimizing params
+
+def getFunction(x):
+    return (x + 3)**2
+
+def getDerivative(x):
+    return 2 * (x + 3)
+    
+def gradientDescent(starting_x, learning_rate, iterations):
+    x = starting_x
+    for i in range(iterations):
+        gradient = getDerivative(x)
+        x = x - learning_rate * gradient
+        print(f"Iteration {i + 1}: x = {x}, f(x) = {getFunction(x)}")
+    return x
+    
+ x = 2
+learning_rate = 0.1
+iterations = 100
+minima = gradientDescent(x, learning_rate, iterations)
+print(f"Local minima found at x = {minima}, f(x) = {getFunction(x)}")
+
+import sympy as sym
+import numpy as np
+
+import matplotlib as pyplot
+from matplotlib import pyplot
+alpha=0.1
+start=2
+max_iter=30
+x=sym.symbols('x')
+expr=(x+3)**2
+
+
+x = gradientDescent(2, 0.1, max_iter)
+x_cor = np.linspace(-5,5,100)
+pyplot.plot(x_cor, getFunction(x_cor))
+# pyplot.plot(x_cor, getFunction(x_cor))
+pyplot.plot(x, getFunction(x), '.', color='green')
+

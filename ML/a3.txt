@@ -1,0 +1,58 @@
+import pandas as pd
+import tensorflow as tf
+from tensorflow import keras
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+
+df = pd.read_csv("Churn_Modelling.csv")
+df.head()
+
+x = df.drop(columns=['Exited', 'RowNumber','Surname','CustomerId'])
+y = df['Exited']
+
+df = df.drop(['CustomerId', 'Surname', 'RowNumber'], axis = 1)
+print(df.columns)
+
+df.isnull().sum()
+
+x = pd.get_dummies(x, columns=['Geography', 'Gender'], drop_first=True)
+
+scaler = MinMaxScaler()
+x = scaler.fit_transform(x)
+
+
+import tensorflow as tf
+from tensorflow import keras
+
+model = keras.Sequential([
+    keras.layers.Dense(64, activation ='relu', input_shape=(x.shape[1],)),
+    keras.layers.Dense(32, activation='relu'),
+    keras.layers.Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+# Train the model
+
+model.fit(X_train, y_train, epochs=40, batch_size=32, verbose=1)
+
+# Step 6: Evaluate the Model
+y_pred = model.predict(X_test)
+y_pred = (y_pred > 0.5).astype(int) 
+
+from sklearn.metrics import ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+accuracy = accuracy_score(y_test, y_pred)
+confusion = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion)
+disp.plot()
+plt.show()
+
+print(f"Accuracy: {accuracy}")
+print("Confusion Matrix:")
+print(confusion)
+
