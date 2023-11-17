@@ -1,0 +1,72 @@
+import pandas as pd
+import numpy as np
+
+# Predict the price of the Uber ride from a given pickup point to the agreed drop-off 
+# location. Perform following tasks: 
+# 1. Pre-process the dataset. 
+# 2. Identify outliers. 
+# 3. Check the correlation. 
+# 4. Implement linear regression and random forest regression models. 
+# Evaluate the models and compare their respective scores like R2, RMSE, etc. 
+# Dataset link: https://www.kaggle.com/datasets/yasserh/uber-fares-dataset 
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+
+df = pd.read_csv("uber.csv")
+
+df.dropna(inplace=True)
+df.isnull().sum()
+
+df = df[df["fare_amount"].apply(lambda x : x >= 0)]
+df = df[df["passenger_count"].apply(lambda x : x <= 8)]
+
+plt.boxplot(df["fare_amount"])
+
+q_low = df["fare_amount"].quantile(0.01)
+q_high = df["fare_amount"].quantile(0.99)
+
+df = df[(df["fare_amount"] < q_high) & (df["fare_amount"] > q_low)]
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.model_selection  import train_test_split
+
+df.drop(columns="pickup_datetime", inplace=True)
+df.drop(columns='Unnamed: 0', inplace=True)
+
+df.drop(columns="key", inplace=True)
+
+x=df.drop("fare_amount", axis=1)
+y=df['fare_amount']
+
+
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=1)
+x_train.head()
+
+lrmodel=LinearRegression()
+lrmodel.fit(x_train, y_train)
+
+predictedvalues = lrmodel.predict(x_test)
+
+from sklearn.metrics import mean_squared_error
+lrmodelrmse = np.sqrt(mean_squared_error(predictedvalues, y_test))
+print("RMSE value for Linear regression is", lrmodelrmse)
+
+from sklearn.ensemble import RandomForestRegressor
+rfr_model = RandomForestRegressor(n_estimators=100, random_state = 101)
+
+rfr_model.fit(x_train, y_train)
+rfrmodel_pred = rfr_model.predict(x_test)
+
+#Errors for the forest
+rfrmodel_rmse = mean_squared_error(rfrmodel_pred, y_test, squared=False)
+print("RMSE value for Random Forest is:",rfrmodel_rmse)
+
+
+
+
+
